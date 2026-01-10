@@ -197,6 +197,8 @@ function renderCategoryCards(targetEl, onClick){
     const icon = CATEGORY_ICONS[cat] || "📚";
     const btn = document.createElement("button");
     btn.className = "cardbtn";
+    btn.dataset.category = cat;
+btn.style.setProperty("--accent", CATEGORY_COLORS[cat] || "#6C4BFF");
     btn.innerHTML = `
       <div class="badgeNum">${icon}</div>
       <div class="cardtitle">${escapeHtml(cat)}</div>
