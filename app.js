@@ -313,6 +313,9 @@ function renderQuestion(){
   explanationBox.classList.add("hidden");
   nextBtn.classList.add("hidden");
   answersEl.innerHTML = "";
+// Accent couleur selon la catégorie (pour styliser l'écran quiz)
+const accent = (CATEGORY_COLORS[state.activeQuiz.category] || "#6C4BFF");
+document.documentElement.style.setProperty("--accent", accent);
 
   const q = state.activeQuiz.questions[state.currentIndex];
   progressPill.textContent = `QUESTION ${state.currentIndex + 1} / 20`;
