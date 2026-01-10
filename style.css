@@ -332,3 +332,103 @@ h2{
   color:var(--muted);
   padding:16px 0;
 }
+/* =========================================
+   QUIZ SCREEN – COLOR BOOST (utilise --accent)
+   ========================================= */
+
+:root{
+  --accent: #6C4BFF; /* fallback */
+}
+
+/* fond plus vivant sur l'écran quiz */
+#quiz.card{
+  background:
+    radial-gradient(900px 380px at 10% 0%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 60%),
+    radial-gradient(700px 340px at 90% 0%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 62%),
+    var(--card);
+}
+
+/* pill QUESTION 1/20 plus "app" */
+#quiz .pill{
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+      color-mix(in srgb, var(--accent) 62%, #000000 38%) 100%);
+  color:#fff;
+  box-shadow: 0 10px 22px rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.25);
+}
+
+/* la ligne meta (Difficile • Coran • Quiz #1) */
+#quiz .meta{
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding:8px 12px;
+  border-radius:999px;
+  display:inline-block;
+  border:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* réponses : carte + vignette + relief */
+#quiz .answer{
+  border:1px solid rgba(255,255,255,.65);
+  background:
+    radial-gradient(140px 90px at 18% 35%, rgba(255,255,255,.70) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 12%, #ffffff 88%) 0%,
+      #ffffff 70%);
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.70);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+
+#quiz .answer:hover{
+  transform: translateY(-3px);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.70);
+  filter: brightness(1.02);
+}
+
+/* badge A/B/C/D coloré */
+#quiz .badge{
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+      color-mix(in srgb, var(--accent) 62%, #000000 38%) 100%);
+  color:#fff;
+  box-shadow:0 10px 20px rgba(0,0,0,.18);
+}
+
+/* états correct/faux plus jolis */
+#quiz .answer.correct{
+  background: linear-gradient(135deg, #2ecc71 0%, #1f9d57 100%);
+  color:#fff;
+}
+#quiz .answer.wrong{
+  background: linear-gradient(135deg, #ff4d6d 0%, #c9184a 100%);
+  color:#fff;
+}
+#quiz .answer.correct .badge,
+#quiz .answer.wrong .badge{
+  background: rgba(255,255,255,.22);
+  color:#fff;
+}
+
+/* Explications stylées */
+#quiz .explain{
+  background:
+    radial-gradient(300px 180px at 20% 0%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 70%),
+    #f7f6ff;
+  border:1px solid color-mix(in srgb, var(--accent) 22%, #e6e3ff 78%);
+  box-shadow: 0 12px 28px rgba(0,0,0,.10);
+}
+
+/* Bouton "Question suivante" reprend l'accent */
+#quiz .btn.primary{
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+      color-mix(in srgb, var(--accent) 62%, #000000 38%) 100%);
+  box-shadow: 0 14px 30px rgba(0,0,0,.18);
+}
