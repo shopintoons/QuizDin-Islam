@@ -75,6 +75,16 @@ const CATEGORY_ICONS = {
   "Vocabulaire": "🧠",
   "Histoire": "📜"
 };
+const CATEGORY_COLORS = {
+  "Coran": "#2D6A4F",
+  "Piliers": "#6C4BFF",
+  "Pratiques": "#1D4ED8",
+  "Ramadan": "#8B5CF6",
+  "Hajj": "#D97706",
+  "Prophètes": "#0EA5E9",
+  "Vocabulaire": "#10B981",
+  "Histoire": "#F43F5E"
+};
 
 function show(section) {
   [home, categories, quizlist, quiz, result].forEach(s => s.classList.add("hidden"));
