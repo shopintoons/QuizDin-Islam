@@ -1,6 +1,5 @@
-/* global QUESTIONS */
+/* global QUESTIONS, QUIZ_QUESTIONS */
 
-/* ====== CONFIG ====== */
 const CATEGORY_ICONS = {
   "Coran": "📖",
   "Piliers": "🧱",
@@ -23,33 +22,48 @@ const CATEGORY_COLORS = {
   "Histoire": "#F43F5E"
 };
 
-const QUIZ_SIZE = 20;
-
-/* ====== HELPERS ====== */
 const $ = (id) => document.getElementById(id);
 
-function show(section){
-  [home, categories, quizList, quiz, result].forEach(s => s.classList.add("hidden"));
-  section.classList.remove("hidden");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+// --- Build quizzes from flat question bank (questions.js) ---
+const QUESTION_BANK = window.QUIZ_QUESTIONS || window.QUESTIONS || [];
+
+function buildQuizzes(bank, packSize = 20) {
+  const groups = new Map();
+
+  for (const it of bank) {
+    const category = it.category || "Autre";
+    const level = String(it.level || "facile").toLowerCase(); // facile/moyen/difficile
+    const key = `${category}__${level}`;
+
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({
+      q: it.q,
+      options: it.options,
+      answer: it.answerIndex, // conversion answerIndex -> answer (0..3)
+      explain: it.explain || ""
+    });
+  }
+
+  const quizzes = [];
+  for (const [key, questions] of groups.entries()) {
+    const [category, level] = key.split("__");
+
+    for (let i = 0; i < questions.length; i += packSize) {
+      quizzes.push({
+        category,
+        level,
+        index: Math.floor(i / packSize) + 1,
+        questions: questions.slice(i, i + packSize),
+      });
+    }
+  }
+
+  return quizzes;
 }
 
-function normalizeLevel(lvl){
-  return String(lvl || "").trim().toLowerCase(); // "facile"|"moyen"|"difficile"
-}
-function displayLevel(lvl){
-  const n = normalizeLevel(lvl);
-  if(!n) return "";
-  return n.charAt(0).toUpperCase() + n.slice(1);
-}
+const QUIZZES = buildQuizzes(QUESTION_BANK, 20);
+// ------------------------------------------------------------
 
-function chunk(arr, size){
-  const out = [];
-  for(let i=0; i<arr.length; i+=size) out.push(arr.slice(i, i+size));
-  return out;
-}
-
-/* ====== DOM ====== */
 const home = $("home");
 const categories = $("categories");
 const quizList = $("quizList");
@@ -75,93 +89,8 @@ const retryBtn = $("retryBtn");
 const scorePercent = $("scorePercent");
 const scoreGood = $("scoreGood");
 
-/* ====== DATA: build quizzes from question-bank ====== */
-/**
- * Accepts either:
- *  - window.QUESTIONS = quiz packs
- *  - window.QUIZ_QUESTIONS = question bank
- *  - window.QUESTIONS = question bank (your case)
- */
-function detectSource(){
-  // 1) If your questions.js used window.QUIZ_QUESTIONS
-  if (Array.isArray(window.QUIZ_QUESTIONS)) return window.QUIZ_QUESTIONS;
-
-  // 2) If global QUESTIONS exists
-  if (Array.isArray(window.QUESTIONS)) return window.QUESTIONS;
-
-  // 3) If global QUESTIONS constant injected
-  if (Array.isArray(typeof QUESTIONS !== "undefined" ? QUESTIONS : null)) return QUESTIONS;
-
-  return [];
-}
-
-function isQuizPack(obj){
-  return obj && typeof obj === "object" && Array.isArray(obj.questions);
-}
-function isSingleQuestion(obj){
-  return obj && typeof obj === "object" && typeof obj.q === "string" && Array.isArray(obj.options);
-}
-
-function buildQuizzesFromQuestions(questionBank){
-  // group by category + level(normalized)
-  const map = new Map();
-
-  questionBank.forEach((q) => {
-    if(!isSingleQuestion(q)) return;
-
-    const cat = String(q.category || "").trim();
-    const lvlN = normalizeLevel(q.level);
-    if(!cat || !lvlN) return;
-
-    const key = `${cat}__${lvlN}`;
-    if(!map.has(key)) map.set(key, []);
-    map.get(key).push(q);
-  });
-
-  const quizzes = [];
-
-  for (const [key, arr] of map.entries()){
-    const [cat, lvlN] = key.split("__");
-    const lvlD = displayLevel(lvlN);
-
-    // On fait des séries de 20 (on garde l’ordre d’origine)
-    const packs = chunk(arr, QUIZ_SIZE);
-
-    packs.forEach((pack, idx) => {
-      // si tu veux STRICT 20 seulement, décommente la ligne suivante :
-      // if (pack.length < QUIZ_SIZE) return;
-
-      quizzes.push({
-        category: cat,
-        level: lvlD,              // "Facile" / "Moyen" / "Difficile"
-        levelNorm: lvlN,          // "facile" / "moyen" / "difficile"
-        index: idx + 1,
-        questions: pack
-      });
-    });
-  }
-
-  // Tri stable : catégorie puis niveau puis index
-  const levelOrder = { facile: 1, moyen: 2, difficile: 3 };
-  quizzes.sort((a,b) => {
-    if(a.category !== b.category) return a.category.localeCompare(b.category, "fr");
-    const ao = levelOrder[a.levelNorm] || 99;
-    const bo = levelOrder[b.levelNorm] || 99;
-    if(ao !== bo) return ao - bo;
-    return (a.index || 0) - (b.index || 0);
-  });
-
-  return quizzes;
-}
-
-const SOURCE = detectSource();
-const QUIZZES = (SOURCE.length && isQuizPack(SOURCE[0]))
-  ? SOURCE
-  : buildQuizzesFromQuestions(SOURCE);
-
-/* ====== STATE ====== */
 const state = {
-  level: "Facile",
+  level: "facile", // IMPORTANT: doit matcher questions.js (facile/moyen/difficile)
   category: null,
   activeQuiz: null,
   currentIndex: 0,
@@ -169,30 +98,36 @@ const state = {
   locked: false
 };
 
-/* ====== LOGIC ====== */
-function getCategories(){
+function show(section) {
+  [home, categories, quizList, quiz, result].forEach(s => s.classList.add("hidden"));
+  section.classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function capitalize(s) {
+  return (s || "").charAt(0).toUpperCase() + (s || "").slice(1);
+}
+
+function getCategories() {
   const set = new Set();
   QUIZZES.forEach(qz => set.add(qz.category));
   return Array.from(set);
 }
 
-function quizzesBy(category, levelDisplay){
-  const lvlN = normalizeLevel(levelDisplay);
-  return QUIZZES.filter(qz =>
-    qz.category === category &&
-    normalizeLevel(qz.level || qz.levelNorm) === lvlN
-  );
+function quizzesBy(category, level) {
+  return QUIZZES.filter(qz => qz.category === category && qz.level === level);
 }
 
-function renderFeatured(){
+function renderFeatured() {
   featuredGrid.innerHTML = "";
+  // 4 cartes "incontournables" = 4 catégories si possible
   const cats = getCategories().slice(0, 4);
   cats.forEach(cat => {
     featuredGrid.appendChild(makeCategoryCard(cat, true));
   });
 }
 
-function makeCategoryCard(cat, isFeatured){
+function makeCategoryCard(cat, isFeatured) {
   const btn = document.createElement("button");
   btn.className = "cardbtn";
   btn.style.setProperty("--accent", CATEGORY_COLORS[cat] || "#6C4BFF");
@@ -200,7 +135,7 @@ function makeCategoryCard(cat, isFeatured){
   const icon = CATEGORY_ICONS[cat] || "❓";
   btn.innerHTML = `
     <div class="badgeNum">${icon}</div>
-    <div class="cardtitle">${cat}${isFeatured ? " • " + state.level : ""}</div>
+    <div class="cardtitle">${cat}${isFeatured ? " • " + capitalize(state.level) : ""}</div>
     <div class="cardsub">${isFeatured ? "Commencer directement →" : "Quiz par niveaux • séries de 20"}</div>
   `;
 
@@ -212,20 +147,22 @@ function makeCategoryCard(cat, isFeatured){
   return btn;
 }
 
-function renderCategories(){
+function renderCategories() {
   categoryGrid.innerHTML = "";
   getCategories().forEach(cat => {
     categoryGrid.appendChild(makeCategoryCard(cat, false));
   });
 }
 
-function openQuizList(cat){
+function openQuizList(cat) {
   state.category = cat;
   quizListTitle.textContent = `Quiz ${cat}`;
-  quizListMeta.textContent = `• ${QUIZ_SIZE} questions • Niveau ${state.level}`;
+  quizListMeta.textContent = `• 20 questions • Niveau ${capitalize(state.level)}`;
 
+  // Accent global par catégorie pour l'écran quiz-list
   document.documentElement.style.setProperty("--accent", CATEGORY_COLORS[cat] || "#2a8c7f");
 
+  // tabs active
   document.querySelectorAll(".tab").forEach(t => {
     t.classList.toggle("active", t.dataset.level === state.level);
   });
@@ -234,11 +171,11 @@ function openQuizList(cat){
   show(quizList);
 }
 
-function renderQuizGrid(){
+function renderQuizGrid() {
   quizGrid.innerHTML = "";
 
   const list = quizzesBy(state.category, state.level);
-  quizListMeta.textContent = `${list.length} quiz disponibles • ${QUIZ_SIZE} questions • Niveau ${state.level}`;
+  quizListMeta.textContent = `${list.length} quiz disponibles • 20 questions • Niveau ${capitalize(state.level)}`;
 
   list.forEach((qz, i) => {
     const card = document.createElement("div");
@@ -246,9 +183,9 @@ function renderQuizGrid(){
     card.style.setProperty("--accent", CATEGORY_COLORS[state.category] || "#2a8c7f");
 
     card.innerHTML = `
-      <div class="quizNo">#${(qz.index ?? (i+1))}</div>
+      <div class="quizNo">#${(qz.index ?? (i + 1))}</div>
       <div class="quizmeta">${CATEGORY_ICONS[state.category] || "❓"} <b>${state.category}</b></div>
-      <div class="quiztitle">${state.level} • ${QUIZ_SIZE} questions</div>
+      <div class="quiztitle">${capitalize(state.level)} • ${qz.questions.length} questions</div>
       <div class="quizmeta">Clique pour commencer</div>
     `;
 
@@ -257,7 +194,7 @@ function renderQuizGrid(){
   });
 }
 
-function startQuiz(qz, indexFallback){
+function startQuiz(qz, indexFallback) {
   state.activeQuiz = {
     ...qz,
     index: (qz.index ?? (indexFallback + 1))
@@ -270,7 +207,7 @@ function startQuiz(qz, indexFallback){
   show(quiz);
 }
 
-function renderQuestion(){
+function renderQuestion() {
   state.locked = false;
   explainBox.classList.add("hidden");
   nextBtn.classList.add("hidden");
@@ -281,11 +218,14 @@ function renderQuestion(){
 
   const q = state.activeQuiz.questions[state.currentIndex];
 
-  progressPill.textContent = `QUESTION ${state.currentIndex + 1} / ${QUIZ_SIZE}`;
-  metaLine.textContent = `${state.activeQuiz.level} • ${state.activeQuiz.category} • Quiz #${state.activeQuiz.index}`;
+  // Sécurité si pack < 20
+  const total = state.activeQuiz.questions.length;
+
+  progressPill.textContent = `QUESTION ${state.currentIndex + 1} / ${total}`;
+  metaLine.textContent = `${capitalize(state.activeQuiz.level)} • ${state.activeQuiz.category} • Quiz #${state.activeQuiz.index}`;
   questionText.textContent = q.q;
 
-  const letters = ["A","B","C","D"];
+  const letters = ["A", "B", "C", "D"];
   q.options.forEach((opt, idx) => {
     const btn = document.createElement("button");
     btn.className = "answer";
@@ -295,24 +235,20 @@ function renderQuestion(){
   });
 }
 
-function chooseAnswer(chosenIndex){
-  if(state.locked) return;
+function chooseAnswer(chosenIndex) {
+  if (state.locked) return;
   state.locked = true;
 
   const q = state.activeQuiz.questions[state.currentIndex];
-
-  // IMPORTANT: ton fichier utilise answerIndex (et parfois certains utilisent answer)
-  const correct = (typeof q.answerIndex === "number")
-    ? q.answerIndex
-    : q.answer;
+  const correct = q.answer; // index 0..3
 
   const buttons = Array.from(answersEl.querySelectorAll(".answer"));
   buttons.forEach(b => b.classList.add("disabled"));
 
-  if(chosenIndex === correct){
+  if (chosenIndex === correct) {
     state.score += 1;
     buttons[chosenIndex].classList.add("correct");
-  }else{
+  } else {
     buttons[chosenIndex].classList.add("wrong");
     if (buttons[correct]) buttons[correct].classList.add("correct");
   }
@@ -321,15 +257,17 @@ function chooseAnswer(chosenIndex){
   explainBox.classList.remove("hidden");
   nextBtn.classList.remove("hidden");
 
-  if(state.currentIndex === (QUIZ_SIZE - 1)){
+  const lastIndex = state.activeQuiz.questions.length - 1;
+  if (state.currentIndex === lastIndex) {
     nextBtn.textContent = "Voir mon score →";
-  }else{
+  } else {
     nextBtn.textContent = "Question suivante →";
   }
 }
 
-function next(){
-  if(state.currentIndex === (QUIZ_SIZE - 1)){
+function next() {
+  const lastIndex = state.activeQuiz.questions.length - 1;
+  if (state.currentIndex === lastIndex) {
     showResult();
     return;
   }
@@ -337,58 +275,54 @@ function next(){
   renderQuestion();
 }
 
-function showResult(){
-  const percent = Math.round((state.score / QUIZ_SIZE) * 100);
+function showResult() {
+  const total = state.activeQuiz.questions.length;
+  const percent = Math.round((state.score / total) * 100);
   scorePercent.textContent = `${percent}%`;
   scoreGood.textContent = `${state.score}`;
   show(result);
 }
 
-/* ====== EVENTS ====== */
+/* EVENTS */
 
 // level pills (home)
 document.querySelectorAll(".pillbtn[data-level]").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".pillbtn[data-level]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    state.level = btn.dataset.level; // "Facile" / "Moyen" / "Difficile"
+    state.level = btn.dataset.level; // doit être facile/moyen/difficile
     renderFeatured();
   });
 });
 
-$("btnCategories").addEventListener("click", () => {
+$("btnCategories")?.addEventListener("click", () => {
   renderCategories();
   show(categories);
 });
 
-$("backHome1").addEventListener("click", () => show(home));
-$("backHome2").addEventListener("click", () => show(home));
-$("backHome3").addEventListener("click", () => show(home));
+$("backHome1")?.addEventListener("click", () => show(home));
+$("backHome2")?.addEventListener("click", () => show(home));
+$("backHome3")?.addEventListener("click", () => show(home));
 
 document.querySelectorAll(".tab").forEach(t => {
   t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
     t.classList.add("active");
-    state.level = t.dataset.level;
+    state.level = t.dataset.level; // facile/moyen/difficile
     renderQuizGrid();
   });
 });
 
-nextBtn.addEventListener("click", next);
+nextBtn?.addEventListener("click", next);
 
-quitBtn.addEventListener("click", () => {
+quitBtn?.addEventListener("click", () => {
   show(quizList);
 });
 
-retryBtn.addEventListener("click", () => {
+retryBtn?.addEventListener("click", () => {
   startQuiz(state.activeQuiz, state.activeQuiz.index - 1);
 });
 
-/* ====== INIT ====== */
+/* INIT */
 renderFeatured();
 show(home);
-
-// Debug utile (tu peux supprimer après)
-console.log("SOURCE length:", SOURCE.length);
-console.log("QUIZZES length:", QUIZZES.length);
-console.log("Categories:", getCategories());
