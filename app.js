@@ -1,5 +1,6 @@
 /* global QUESTIONS */
 
+/* ====== CONFIG ====== */
 const CATEGORY_ICONS = {
   "Coran": "📖",
   "Piliers": "🧱",
@@ -22,8 +23,33 @@ const CATEGORY_COLORS = {
   "Histoire": "#F43F5E"
 };
 
+const QUIZ_SIZE = 20;
+
+/* ====== HELPERS ====== */
 const $ = (id) => document.getElementById(id);
 
+function show(section){
+  [home, categories, quizList, quiz, result].forEach(s => s.classList.add("hidden"));
+  section.classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function normalizeLevel(lvl){
+  return String(lvl || "").trim().toLowerCase(); // "facile"|"moyen"|"difficile"
+}
+function displayLevel(lvl){
+  const n = normalizeLevel(lvl);
+  if(!n) return "";
+  return n.charAt(0).toUpperCase() + n.slice(1);
+}
+
+function chunk(arr, size){
+  const out = [];
+  for(let i=0; i<arr.length; i+=size) out.push(arr.slice(i, i+size));
+  return out;
+}
+
+/* ====== DOM ====== */
 const home = $("home");
 const categories = $("categories");
 const quizList = $("quizList");
@@ -49,6 +75,91 @@ const retryBtn = $("retryBtn");
 const scorePercent = $("scorePercent");
 const scoreGood = $("scoreGood");
 
+/* ====== DATA: build quizzes from question-bank ====== */
+/**
+ * Accepts either:
+ *  - window.QUESTIONS = quiz packs
+ *  - window.QUIZ_QUESTIONS = question bank
+ *  - window.QUESTIONS = question bank (your case)
+ */
+function detectSource(){
+  // 1) If your questions.js used window.QUIZ_QUESTIONS
+  if (Array.isArray(window.QUIZ_QUESTIONS)) return window.QUIZ_QUESTIONS;
+
+  // 2) If global QUESTIONS exists
+  if (Array.isArray(window.QUESTIONS)) return window.QUESTIONS;
+
+  // 3) If global QUESTIONS constant injected
+  if (Array.isArray(typeof QUESTIONS !== "undefined" ? QUESTIONS : null)) return QUESTIONS;
+
+  return [];
+}
+
+function isQuizPack(obj){
+  return obj && typeof obj === "object" && Array.isArray(obj.questions);
+}
+function isSingleQuestion(obj){
+  return obj && typeof obj === "object" && typeof obj.q === "string" && Array.isArray(obj.options);
+}
+
+function buildQuizzesFromQuestions(questionBank){
+  // group by category + level(normalized)
+  const map = new Map();
+
+  questionBank.forEach((q) => {
+    if(!isSingleQuestion(q)) return;
+
+    const cat = String(q.category || "").trim();
+    const lvlN = normalizeLevel(q.level);
+    if(!cat || !lvlN) return;
+
+    const key = `${cat}__${lvlN}`;
+    if(!map.has(key)) map.set(key, []);
+    map.get(key).push(q);
+  });
+
+  const quizzes = [];
+
+  for (const [key, arr] of map.entries()){
+    const [cat, lvlN] = key.split("__");
+    const lvlD = displayLevel(lvlN);
+
+    // On fait des séries de 20 (on garde l’ordre d’origine)
+    const packs = chunk(arr, QUIZ_SIZE);
+
+    packs.forEach((pack, idx) => {
+      // si tu veux STRICT 20 seulement, décommente la ligne suivante :
+      // if (pack.length < QUIZ_SIZE) return;
+
+      quizzes.push({
+        category: cat,
+        level: lvlD,              // "Facile" / "Moyen" / "Difficile"
+        levelNorm: lvlN,          // "facile" / "moyen" / "difficile"
+        index: idx + 1,
+        questions: pack
+      });
+    });
+  }
+
+  // Tri stable : catégorie puis niveau puis index
+  const levelOrder = { facile: 1, moyen: 2, difficile: 3 };
+  quizzes.sort((a,b) => {
+    if(a.category !== b.category) return a.category.localeCompare(b.category, "fr");
+    const ao = levelOrder[a.levelNorm] || 99;
+    const bo = levelOrder[b.levelNorm] || 99;
+    if(ao !== bo) return ao - bo;
+    return (a.index || 0) - (b.index || 0);
+  });
+
+  return quizzes;
+}
+
+const SOURCE = detectSource();
+const QUIZZES = (SOURCE.length && isQuizPack(SOURCE[0]))
+  ? SOURCE
+  : buildQuizzesFromQuestions(SOURCE);
+
+/* ====== STATE ====== */
 const state = {
   level: "Facile",
   category: null,
@@ -58,27 +169,23 @@ const state = {
   locked: false
 };
 
-function show(section){
-  [home, categories, quizList, quiz, result].forEach(s => s.classList.add("hidden"));
-  section.classList.remove("hidden");
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function capitalize(s){ return (s || "").charAt(0).toUpperCase() + (s || "").slice(1); }
-
+/* ====== LOGIC ====== */
 function getCategories(){
   const set = new Set();
-  QUESTIONS.forEach(qz => set.add(qz.category));
+  QUIZZES.forEach(qz => set.add(qz.category));
   return Array.from(set);
 }
 
-function quizzesBy(category, level){
-  return QUESTIONS.filter(qz => qz.category === category && qz.level === level);
+function quizzesBy(category, levelDisplay){
+  const lvlN = normalizeLevel(levelDisplay);
+  return QUIZZES.filter(qz =>
+    qz.category === category &&
+    normalizeLevel(qz.level || qz.levelNorm) === lvlN
+  );
 }
 
 function renderFeatured(){
   featuredGrid.innerHTML = "";
-  // 4 cartes "incontournables" = 4 catégories si possible
   const cats = getCategories().slice(0, 4);
   cats.forEach(cat => {
     featuredGrid.appendChild(makeCategoryCard(cat, true));
@@ -115,12 +222,10 @@ function renderCategories(){
 function openQuizList(cat){
   state.category = cat;
   quizListTitle.textContent = `Quiz ${cat}`;
-  quizListMeta.textContent = `• 20 questions • Niveau ${state.level}`;
+  quizListMeta.textContent = `• ${QUIZ_SIZE} questions • Niveau ${state.level}`;
 
-  // Accent global par catégorie pour l'écran quiz-list
   document.documentElement.style.setProperty("--accent", CATEGORY_COLORS[cat] || "#2a8c7f");
 
-  // tabs active
   document.querySelectorAll(".tab").forEach(t => {
     t.classList.toggle("active", t.dataset.level === state.level);
   });
@@ -133,17 +238,17 @@ function renderQuizGrid(){
   quizGrid.innerHTML = "";
 
   const list = quizzesBy(state.category, state.level);
-  quizListMeta.textContent = `${list.length} quiz disponibles • 20 questions • Niveau ${state.level}`;
+  quizListMeta.textContent = `${list.length} quiz disponibles • ${QUIZ_SIZE} questions • Niveau ${state.level}`;
 
   list.forEach((qz, i) => {
     const card = document.createElement("div");
     card.className = "quizcard";
-    card.style.setProperty("--accent", CATEGORY_COLORS[state.category] || "#2a8c7f"); // <-- COLORÉ
+    card.style.setProperty("--accent", CATEGORY_COLORS[state.category] || "#2a8c7f");
 
     card.innerHTML = `
       <div class="quizNo">#${(qz.index ?? (i+1))}</div>
       <div class="quizmeta">${CATEGORY_ICONS[state.category] || "❓"} <b>${state.category}</b></div>
-      <div class="quiztitle">${state.level} • 20 questions</div>
+      <div class="quiztitle">${state.level} • ${QUIZ_SIZE} questions</div>
       <div class="quizmeta">Clique pour commencer</div>
     `;
 
@@ -175,7 +280,8 @@ function renderQuestion(){
   document.documentElement.style.setProperty("--accent", accent);
 
   const q = state.activeQuiz.questions[state.currentIndex];
-  progressPill.textContent = `QUESTION ${state.currentIndex + 1} / 20`;
+
+  progressPill.textContent = `QUESTION ${state.currentIndex + 1} / ${QUIZ_SIZE}`;
   metaLine.textContent = `${state.activeQuiz.level} • ${state.activeQuiz.category} • Quiz #${state.activeQuiz.index}`;
   questionText.textContent = q.q;
 
@@ -194,7 +300,11 @@ function chooseAnswer(chosenIndex){
   state.locked = true;
 
   const q = state.activeQuiz.questions[state.currentIndex];
-  const correct = q.answer; // index 0..3
+
+  // IMPORTANT: ton fichier utilise answerIndex (et parfois certains utilisent answer)
+  const correct = (typeof q.answerIndex === "number")
+    ? q.answerIndex
+    : q.answer;
 
   const buttons = Array.from(answersEl.querySelectorAll(".answer"));
   buttons.forEach(b => b.classList.add("disabled"));
@@ -204,14 +314,14 @@ function chooseAnswer(chosenIndex){
     buttons[chosenIndex].classList.add("correct");
   }else{
     buttons[chosenIndex].classList.add("wrong");
-    buttons[correct].classList.add("correct");
+    if (buttons[correct]) buttons[correct].classList.add("correct");
   }
 
   explainBox.textContent = q.explain || "Explication à venir.";
   explainBox.classList.remove("hidden");
   nextBtn.classList.remove("hidden");
 
-  if(state.currentIndex === 19){
+  if(state.currentIndex === (QUIZ_SIZE - 1)){
     nextBtn.textContent = "Voir mon score →";
   }else{
     nextBtn.textContent = "Question suivante →";
@@ -219,7 +329,7 @@ function chooseAnswer(chosenIndex){
 }
 
 function next(){
-  if(state.currentIndex === 19){
+  if(state.currentIndex === (QUIZ_SIZE - 1)){
     showResult();
     return;
   }
@@ -228,20 +338,20 @@ function next(){
 }
 
 function showResult(){
-  const percent = Math.round((state.score / 20) * 100);
+  const percent = Math.round((state.score / QUIZ_SIZE) * 100);
   scorePercent.textContent = `${percent}%`;
   scoreGood.textContent = `${state.score}`;
   show(result);
 }
 
-/* EVENTS */
+/* ====== EVENTS ====== */
 
 // level pills (home)
 document.querySelectorAll(".pillbtn[data-level]").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".pillbtn[data-level]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    state.level = btn.dataset.level;
+    state.level = btn.dataset.level; // "Facile" / "Moyen" / "Difficile"
     renderFeatured();
   });
 });
@@ -274,6 +384,11 @@ retryBtn.addEventListener("click", () => {
   startQuiz(state.activeQuiz, state.activeQuiz.index - 1);
 });
 
-/* INIT */
+/* ====== INIT ====== */
 renderFeatured();
 show(home);
+
+// Debug utile (tu peux supprimer après)
+console.log("SOURCE length:", SOURCE.length);
+console.log("QUIZZES length:", QUIZZES.length);
+console.log("Categories:", getCategories());
