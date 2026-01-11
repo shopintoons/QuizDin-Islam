@@ -432,3 +432,81 @@ h2{
       color-mix(in srgb, var(--accent) 62%, #000000 38%) 100%);
   box-shadow: 0 14px 30px rgba(0,0,0,.18);
 }
+/* =========================================
+   QUIZ SCREEN – COULEURS (utilise --accent)
+   ========================================= */
+:root{ --accent:#6C4BFF; }
+
+/* Fond coloré discret sur l'écran quiz */
+#quiz.card{
+  background:
+    radial-gradient(900px 380px at 10% 0%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 60%),
+    radial-gradient(700px 340px at 90% 0%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 62%),
+    var(--card);
+}
+
+/* Badge QUESTION 1/20 */
+#quiz .pill{
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+    color-mix(in srgb, var(--accent) 60%, #000000 40%) 100%);
+  color:#fff;
+  box-shadow: 0 10px 22px rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.25);
+}
+
+/* Meta (Facile • Coran • Quiz #1) */
+#quiz .meta{
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding:8px 12px;
+  border-radius:999px;
+  display:inline-block;
+  border:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* Réponses colorées + relief */
+#quiz .answer{
+  border:1px solid rgba(255,255,255,.65);
+  background:
+    radial-gradient(140px 90px at 18% 35%, rgba(255,255,255,.70) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 12%, #ffffff 88%) 0%,
+      #ffffff 70%);
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.70);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+#quiz .answer:hover{
+  transform: translateY(-3px);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.70);
+  filter: brightness(1.02);
+}
+
+/* Badges A/B/C/D */
+#quiz .badge{
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+    color-mix(in srgb, var(--accent) 60%, #000000 40%) 100%);
+  color:#fff;
+  box-shadow:0 10px 20px rgba(0,0,0,.18);
+}
+
+/* Explications */
+#quiz .explain{
+  background:
+    radial-gradient(300px 180px at 20% 0%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 70%),
+    #f7f6ff;
+  border:1px solid color-mix(in srgb, var(--accent) 22%, #e6e3ff 78%);
+  box-shadow: 0 12px 28px rgba(0,0,0,.10);
+}
+
+/* Bouton suivant = accent */
+#quiz .btn.primary{
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+    color-mix(in srgb, var(--accent) 60%, #000000 40%) 100%);
+  box-shadow: 0 14px 30px rgba(0,0,0,.18);
+}
