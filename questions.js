@@ -4200,3 +4200,4 @@ window.QUIZ_QUESTIONS = [
     "explain": "« Wudu » signifie : ablution."
   }
 ];
+window.QUESTIONS = window.QUIZ_QUESTIONS;
