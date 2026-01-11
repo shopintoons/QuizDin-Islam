@@ -3,28 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Quiz Islam - QuizDin</title>
-  <meta name="description" content="Web app de quiz Islam : catégories, niveaux, séries de 20 questions, explications et score." />
+  <title>QuizDin Islam</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <!-- BANNIÈRE (PNG) -->
   <header class="top-banner">
-  <img src="assets/banner-quizdin.png" alt="QuizDin – Quiz & Jeux Islam">
-</header>
-  <header class="topbar">
+    <img src="assets/banner-quizdin.png" alt="QuizDin – Quiz & Jeux" />
+  </header>
+
+  <div class="topbar">
     <div class="brand">
       <div class="logo">
-  <img src="assets/logo-quizdin.png" alt="QuizDin logo">
-</div>
-      <div class="brand-text">
+        <img src="assets/logo-quizdin.png" alt="QuizDin logo" />
+      </div>
+      <div>
         <div class="brand-title">Quiz Islam</div>
         <div class="brand-sub">QuizDin • Catégories • Niveaux • 20 questions</div>
       </div>
     </div>
-    <nav class="crumbs" id="crumbs"></nav>
-  </header>
+  </div>
 
   <main class="container">
+
     <!-- HOME -->
     <section id="home" class="card">
       <h1>Quiz Islam</h1>
@@ -34,110 +36,81 @@
       </p>
 
       <div class="quick">
-        <button class="pillbtn" data-home-level="facile">Facile</button>
-        <button class="pillbtn" data-home-level="moyen">Moyen</button>
-        <button class="pillbtn" data-home-level="difficile">Difficile</button>
-        <button class="pillbtn ghost" id="seeAllBtn">Voir toutes les catégories</button>
+        <button class="pillbtn active" data-level="Facile">Facile</button>
+        <button class="pillbtn" data-level="Moyen">Moyen</button>
+        <button class="pillbtn" data-level="Difficile">Difficile</button>
+        <button id="btnCategories" class="pillbtn ghost">Voir toutes les catégories</button>
       </div>
 
-      <h2 class="section-title">Quiz incontournables</h2>
+      <h2>Quiz incontournables</h2>
       <div id="featuredGrid" class="cards"></div>
+    </section>
 
-      <h2 class="section-title">Catégories</h2>
+    <!-- CATEGORIES -->
+    <section id="categories" class="card hidden">
+      <div class="row">
+        <h2>Catégories</h2>
+        <button class="btn" id="backHome1">Accueil</button>
+      </div>
       <div id="categoryGrid" class="cards"></div>
     </section>
 
-    <!-- CATEGORY LIST (all categories) -->
-    <section id="categories" class="card hidden">
-      <div class="head-row">
-        <h2>Catégories</h2>
-        <button class="btn ghost" id="backHome1">Retour</button>
-      </div>
-      <p class="muted">Choisis une thématique, puis un niveau, puis un quiz (#1, #2…).</p>
-      <div id="allCategoryGrid" class="cards"></div>
-    </section>
-
     <!-- QUIZ LIST -->
-    <section id="quizlist" class="card hidden">
-      <div class="head-row">
-        <h2 id="quizlistTitle">Quiz</h2>
-        <button class="btn ghost" id="backHome2">Accueil</button>
+    <section id="quizList" class="card hidden">
+      <div class="row">
+        <div>
+          <h2 id="quizListTitle">Quiz</h2>
+          <div class="muted" id="quizListMeta"></div>
+        </div>
+        <button class="btn" id="backHome2">Accueil</button>
       </div>
 
-      <div class="tabs" role="tablist">
-        <button class="tab active" data-level="facile">Facile</button>
-        <button class="tab" data-level="moyen">Moyen</button>
-        <button class="tab" data-level="difficile">Difficile</button>
+      <div class="tabs">
+        <button class="tab active" data-level="Facile">Facile</button>
+        <button class="tab" data-level="Moyen">Moyen</button>
+        <button class="tab" data-level="Difficile">Difficile</button>
       </div>
 
-      <div class="subnote muted" id="quizCountLine"></div>
       <div id="quizGrid" class="quizgrid"></div>
     </section>
 
-    <!-- QUIZ PLAYER -->
+    <!-- QUIZ -->
     <section id="quiz" class="card hidden">
-      <div class="quiz-head">
-        <div class="pill" id="progressPill">QUESTION 1 / 20</div>
-        <div class="meta" id="metaLine">Niveau • Catégorie • Quiz #</div>
+      <div class="row">
+        <div>
+          <div class="pill" id="progressPill">QUESTION 1 / 20</div>
+          <div class="meta" id="metaLine">Facile • Coran • Quiz #1</div>
+        </div>
+        <button class="btn" id="quitBtn">Quitter</button>
       </div>
 
-      <h2 id="questionText" class="question">Question</h2>
+      <h2 class="qtitle" id="questionText"></h2>
+
       <div id="answers" class="answers"></div>
 
-      <div id="explanationBox" class="explain hidden">
-        <div class="explain-title">EXPLICATIONS</div>
-        <div id="explanationText" class="explain-text"></div>
-      </div>
+      <div id="explainBox" class="explain hidden"></div>
 
-      <div class="actions">
+      <div class="row rowBottom">
         <button id="nextBtn" class="btn primary hidden">Question suivante →</button>
-        <button id="quitBtn" class="btn ghost">Quitter</button>
       </div>
     </section>
 
     <!-- RESULT -->
     <section id="result" class="card hidden">
-      <div class="pill">VOTRE SCORE</div>
-
-      <div class="score-wrap">
-        <div class="score-big">
-          <div id="scorePercent" class="score-percent">0%</div>
-          <div id="scoreLine" class="muted">Vous avez bien répondu à 0 questions sur 20.</div>
-        </div>
-
-        <div class="avg">
-          <div class="avg-title">Moyenne des joueurs</div>
-          <div id="avgPercent" class="avg-percent">—</div>
-          <div class="muted small">(simulée au début — tu peux la connecter à une analytics plus tard)</div>
-        </div>
+      <h2>Votre score…</h2>
+      <div class="scoreWrap">
+        <div class="score-percent" id="scorePercent">0%</div>
+        <div class="muted">Tu as répondu correctement à <b id="scoreGood">0</b> questions sur <b>20</b>.</div>
       </div>
 
-      <div id="resultMsg" class="result-msg">Bien joué !</div>
-
-      <div class="actions">
-        <button id="restartBtn" class="btn primary">Recommencer ce quiz</button>
-        <button id="backToListBtn" class="btn ghost">Retour à la liste</button>
-        <button id="backHomeBtn" class="btn ghost">Accueil</button>
-      </div>
-
-      <div class="newsletter">
-        <div class="newsletter-title">Recevez les nouveaux quiz</div>
-        <div class="newsletter-row">
-          <select id="newsletterFreq">
-            <option value="hebdo">Newsletter Hebdomadaire</option>
-            <option value="mensuel">Newsletter Mensuelle</option>
-          </select>
-          <input id="emailInput" type="email" placeholder="Email *" />
-          <button id="subscribeBtn" class="btn">S’abonner</button>
-        </div>
-        <div id="subscribeMsg" class="muted small"></div>
+      <div class="row rowBottom">
+        <button class="btn primary" id="retryBtn">Recommencer le Quiz</button>
+        <button class="btn" id="backHome3">Accueil</button>
       </div>
     </section>
-  </main>
 
-  <footer class="footer">
-    <span class="muted small">© QuizDin • GitHub Pages • Web app</span>
-  </footer>
+    <div class="footer">© QuizDin • GitHub Pages • Web app</div>
+  </main>
 
   <script src="questions.js"></script>
   <script src="app.js"></script>
