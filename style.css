@@ -1,47 +1,54 @@
 :root{
-  --bg-main: #0f6f66;        /* vert principal */
-  --bg-soft: #e9f6f3;        /* fond clair cartes */
-  --card: #ffffff;
-  --text-main: #0b2f2b;
-}
+  --accent:#2a8c7f;
 
-:root{
-  --bg:#f2f1f7;
+  /* palette inspirée bannière */
+  --bg1:#0b6f66;
+  --bg2:#0a5b55;
+  --paper:#eaf7f4;
   --card:#ffffff;
-  --ink:#14131a;
-  --muted:#6c6a78;
+  --ink:#0b2f2b;
+  --muted:#4f6b66;
 
-  --primary:#6C4BFF;
-  --radius:20px;
-}
-
-/* DARK MODE AUTO */
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0f1020;
-    --card:#16172b;
-    --ink:#f5f5ff;
-    --muted:#a5a6c9;
-  }
+  --radius:22px;
 }
 
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color:var(--ink);
+
+  /* Fond coloré global */
   background:
     radial-gradient(1200px 500px at 10% -10%, rgba(255,255,255,.18), transparent 60%),
-    radial-gradient(1000px 500px at 90% -10%, rgba(255,255,255,.12), transparent 60%),
-    linear-gradient(180deg, #0f6f66 0%, #0b5e57 100%);
-  color: var(--text-main);
+    radial-gradient(1000px 500px at 90% -10%, rgba(255,255,255,.10), transparent 60%),
+    linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
 }
 
+/* ==========================
+   BANNIÈRE TOP (plus petite)
+   ========================== */
+.top-banner{
+  width:100%;
+  padding:14px 0 8px;
+  display:flex;
+  justify-content:center;
+}
+
+.top-banner img{
+  width:min(1200px, 94vw);
+  max-height:190px;          /* <-- taille contrôlée */
+  object-fit:cover;
+  object-position:center;
+  border-radius:18px;
+  box-shadow:0 18px 40px rgba(0,0,0,.28);
+}
 
 /* HEADER */
 .topbar{
-  padding:18px 14px 12px;
-  max-width:1080px;
+  padding:10px 14px 12px;
+  max-width:1200px;
   margin:0 auto;
 }
 
@@ -52,64 +59,88 @@ body{
 }
 
 .logo{
-  width:52px;
-  height:52px;
+  width:54px;
+  height:54px;
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius:16px;
   background:#fff;
-  box-shadow:0 10px 26px rgba(0,0,0,.15);
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
 }
 
 .logo img{
-  width:40px;
-  height:40px;
+  width:42px;
+  height:42px;
   object-fit:contain;
 }
 
 .brand-title{
-  font-weight:900;
-  font-size:18px;
+  font-weight:1000;
+  font-size:20px;
 }
 
 .brand-sub{
   font-size:13px;
-  color:var(--muted);
-  font-weight:700;
+  color:rgba(255,255,255,.85);
+  font-weight:800;
 }
 
 /* LAYOUT */
 .container{
-  max-width:1080px;
+  max-width:1200px;
   margin:0 auto;
   padding:0 14px 28px;
 }
 
 .card{
-  background:var(--card);
-  border-radius:var(--radius);
+  background: var(--paper);  /* <-- pas blanc */
+  border-radius: var(--radius);
   padding:18px;
-  margin-bottom:18px;
-  box-shadow:0 14px 36px rgba(0,0,0,.12);
+  margin:14px 0 18px;
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.20),
+    inset 0 1px 0 rgba(255,255,255,.65);
 }
 
 .hidden{display:none}
 
 h1{
-  font-size:30px;
+  font-size:34px;
   margin:0 0 10px;
 }
-
 h2{
-  font-size:20px;
-  margin:16px 0 10px;
+  font-size:22px;
+  margin:18px 0 10px;
+}
+.muted{color:var(--muted); font-weight:700}
+
+/* rows */
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.rowBottom{margin-top:14px}
+
+/* buttons */
+.btn{
+  border:none;
+  padding:10px 14px;
+  border-radius:14px;
+  background:#ffffff;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 10px 22px rgba(0,0,0,.12);
+}
+.btn.primary{
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%, color-mix(in srgb, var(--accent) 60%, #000 40%) 100%);
+  color:#fff;
 }
 
-.muted{color:var(--muted)}
-.small{font-size:12px}
-
-/* QUICK LEVEL */
+/* level pills */
 .quick{
   display:flex;
   gap:10px;
@@ -119,24 +150,22 @@ h2{
 
 .pillbtn{
   border:none;
-  padding:10px 16px;
+  padding:12px 18px;
   border-radius:999px;
   background:#fff;
-  font-weight:900;
+  font-weight:1000;
   cursor:pointer;
-  box-shadow:0 6px 18px rgba(0,0,0,.12);
+  box-shadow:0 10px 22px rgba(0,0,0,.12);
 }
-
 .pillbtn.active{
-  background:var(--primary);
+  background: linear-gradient(135deg, #6C4BFF 0%, #4d34ff 100%);
   color:#fff;
 }
-
 .pillbtn.ghost{
-  background:#f0f0ff;
+  background: rgba(255,255,255,.75);
 }
 
-/* CATEGORY & FEATURED CARDS */
+/* grids */
 .cards{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -148,7 +177,7 @@ h2{
   .cards{grid-template-columns:repeat(4,1fr);}
 }
 
-/* === VIGNETTE RELIEF === */
+/* === CATÉGORIES / FEATURED : vignette relief colorée === */
 .cardbtn{
   position:relative;
   overflow:hidden;
@@ -166,22 +195,15 @@ h2{
     );
 
   box-shadow:
-    0 18px 44px rgba(0,0,0,.25),
+    0 18px 44px rgba(0,0,0,.26),
     inset 0 1px 0 rgba(255,255,255,.35),
     inset 0 -12px 28px rgba(0,0,0,.22);
 
-  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  transition: transform .2s ease, filter .2s ease;
 }
 
-.cardbtn:hover{
-  transform:translateY(-5px);
-  filter:brightness(1.05);
-}
-
-.cardbtn:active{
-  transform:translateY(-1px);
-  filter:brightness(.97);
-}
+.cardbtn:hover{ transform:translateY(-5px); filter:brightness(1.05); }
+.cardbtn:active{ transform:translateY(-1px); filter:brightness(.98); }
 
 .badgeNum{
   width:44px;
@@ -191,7 +213,7 @@ h2{
   place-items:center;
   background:rgba(255,255,255,.25);
   backdrop-filter:blur(6px);
-  box-shadow:0 8px 18px rgba(0,0,0,.25);
+  box-shadow:0 10px 20px rgba(0,0,0,.25);
   font-size:20px;
   color:#fff;
   margin-bottom:14px;
@@ -200,18 +222,18 @@ h2{
 .cardtitle{
   color:#fff;
   font-weight:1000;
-  font-size:17px;
+  font-size:18px;
   text-shadow:0 2px 10px rgba(0,0,0,.35);
 }
 
 .cardsub{
   margin-top:6px;
-  color:rgba(255,255,255,.85);
+  color:rgba(255,255,255,.88);
   font-size:13px;
-  font-weight:800;
+  font-weight:900;
 }
 
-/* QUIZ LIST */
+/* tabs */
 .tabs{
   display:flex;
   gap:10px;
@@ -223,63 +245,107 @@ h2{
   padding:10px 16px;
   border-radius:999px;
   border:none;
-  background:#f2f2ff;
-  font-weight:900;
+  background:rgba(255,255,255,.75);
+  font-weight:1000;
   cursor:pointer;
+  box-shadow:0 10px 22px rgba(0,0,0,.10);
 }
-
 .tab.active{
-  background:var(--primary);
+  background: linear-gradient(135deg, #6C4BFF 0%, #4d34ff 100%);
   color:#fff;
 }
 
+/* =========================================
+   QUIZ LIST (choix des quiz) : COLORÉ ✅
+   ========================================= */
 .quizgrid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:14px;
   margin-top:14px;
 }
-
 @media(min-width:900px){
   .quizgrid{grid-template-columns:repeat(4,1fr);}
 }
 
 .quizcard{
-  border-radius:20px;
+  position:relative;
+  overflow:hidden;
+  border-radius:22px;
   padding:16px;
-  background:#fff;
-  box-shadow:0 12px 28px rgba(0,0,0,.12);
   cursor:pointer;
-  transition:transform .2s ease, box-shadow .2s ease;
-}
+  --accent:#2a8c7f;
 
+  background:
+    radial-gradient(180px 120px at 25% 15%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 20%, #ffffff 80%) 0%,
+      #ffffff 70%);
+
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:
+    0 16px 36px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.70);
+
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
 .quizcard:hover{
   transform:translateY(-4px);
-  box-shadow:0 16px 36px rgba(0,0,0,.16);
+  filter:brightness(1.02);
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.70);
 }
 
 .quizNo{
-  width:48px;
-  height:48px;
+  width:50px;
+  height:50px;
   border-radius:999px;
   display:grid;
   place-items:center;
-  background:#ffe08a;
+  background: color-mix(in srgb, var(--accent) 20%, #ffe08a 80%);
+  border:1px solid rgba(255,255,255,.55);
   font-weight:1000;
 }
 
-.quiztitle{
-  margin-top:10px;
+.quiztitle{ margin-top:10px; font-weight:1000; }
+.quizmeta{ margin-top:4px; font-size:13px; color:var(--muted); font-weight:800; }
+
+/* =========================================
+   QUIZ SCREEN : COLORÉ ✅ (utilise --accent)
+   ========================================= */
+#quiz.card{
+  background:
+    radial-gradient(900px 380px at 10% 0%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 60%),
+    radial-gradient(700px 340px at 90% 0%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 62%),
+    var(--paper);
+}
+
+.pill{
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:1000;
+
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+    color-mix(in srgb, var(--accent) 60%, #000 40%) 100%);
+  color:#fff;
+  box-shadow: 0 12px 26px rgba(0,0,0,.18);
+}
+
+.meta{
+  margin-top:8px;
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:999px;
   font-weight:900;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
-.quizmeta{
-  margin-top:4px;
-  font-size:13px;
-  color:var(--muted);
-}
+.qtitle{ font-size:28px; margin:16px 0 10px; font-weight:1000; }
 
-/* QUIZ PLAYER */
 .answers{
   display:grid;
   gap:12px;
@@ -288,262 +354,72 @@ h2{
 
 .answer{
   padding:14px;
-  border-radius:16px;
-  border:none;
-  background:#fff;
-  box-shadow:0 8px 18px rgba(0,0,0,.12);
-  font-weight:900;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.65);
+
+  background:
+    radial-gradient(160px 90px at 18% 35%, rgba(255,255,255,.70) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 12%, #ffffff 88%) 0%,
+      #ffffff 70%);
+
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.70);
+
+  font-weight:1000;
   cursor:pointer;
   display:flex;
   gap:12px;
   align-items:center;
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
 }
-
-.answer.correct{
-  background:#34a853;
-  color:#fff;
-}
-
-.answer.wrong{
-  background:#e63946;
-  color:#fff;
-}
-
-.answer.disabled{
-  pointer-events:none;
-  opacity:.9;
-}
+.answer:hover{ transform:translateY(-3px); filter:brightness(1.02); }
+.answer.disabled{ pointer-events:none; opacity:.95; }
 
 .badge{
-  width:34px;
-  height:34px;
+  width:36px;
+  height:36px;
   border-radius:999px;
   display:grid;
   place-items:center;
-  background:rgba(0,0,0,.1);
+  color:#fff;
+  font-weight:1000;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
+    color-mix(in srgb, var(--accent) 60%, #000 40%) 100%);
+  box-shadow:0 10px 20px rgba(0,0,0,.18);
 }
 
-/* EXPLANATION */
+.answer.correct{
+  background: linear-gradient(135deg, #2ecc71 0%, #1f9d57 100%);
+  color:#fff;
+}
+.answer.wrong{
+  background: linear-gradient(135deg, #ff4d6d 0%, #c9184a 100%);
+  color:#fff;
+}
+.answer.correct .badge,
+.answer.wrong .badge{ background: rgba(255,255,255,.22); }
+
 .explain{
   margin-top:14px;
   padding:14px;
-  border-radius:16px;
-  background:#f6f5ff;
+  border-radius:18px;
+  background:
+    radial-gradient(300px 180px at 20% 0%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 70%),
+    #f7f6ff;
+  border:1px solid color-mix(in srgb, var(--accent) 22%, #e6e3ff 78%);
+  box-shadow: 0 12px 28px rgba(0,0,0,.12);
+  font-weight:800;
 }
 
-/* RESULT */
-.score-percent{
-  font-size:52px;
-  font-weight:1000;
-}
+.scoreWrap{ margin-top:10px; }
+.score-percent{ font-size:54px; font-weight:1000; }
 
 .footer{
   text-align:center;
   font-size:13px;
-  color:var(--muted);
-  padding:16px 0;
-}
-/* =========================================
-   QUIZ SCREEN – COLOR BOOST (utilise --accent)
-   ========================================= */
-
-:root{
-  --accent: #6C4BFF; /* fallback */
-}
-
-/* fond plus vivant sur l'écran quiz */
-#quiz.card{
-  background:
-    radial-gradient(900px 380px at 10% 0%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 60%),
-    radial-gradient(700px 340px at 90% 0%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 62%),
-    var(--card);
-}
-
-/* pill QUESTION 1/20 plus "app" */
-#quiz .pill{
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
-      color-mix(in srgb, var(--accent) 62%, #000000 38%) 100%);
-  color:#fff;
-  box-shadow: 0 10px 22px rgba(0,0,0,.18);
-  border: 1px solid rgba(255,255,255,.25);
-}
-
-/* la ligne meta (Difficile • Coran • Quiz #1) */
-#quiz .meta{
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  padding:8px 12px;
-  border-radius:999px;
-  display:inline-block;
-  border:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-/* réponses : carte + vignette + relief */
-#quiz .answer{
-  border:1px solid rgba(255,255,255,.65);
-  background:
-    radial-gradient(140px 90px at 18% 35%, rgba(255,255,255,.70) 0%, rgba(255,255,255,0) 60%),
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--accent) 12%, #ffffff 88%) 0%,
-      #ffffff 70%);
-  box-shadow:
-    0 14px 30px rgba(0,0,0,.10),
-    inset 0 1px 0 rgba(255,255,255,.70);
-  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
-}
-
-#quiz .answer:hover{
-  transform: translateY(-3px);
-  box-shadow:
-    0 18px 40px rgba(0,0,0,.14),
-    inset 0 1px 0 rgba(255,255,255,.70);
-  filter: brightness(1.02);
-}
-
-/* badge A/B/C/D coloré */
-#quiz .badge{
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
-      color-mix(in srgb, var(--accent) 62%, #000000 38%) 100%);
-  color:#fff;
-  box-shadow:0 10px 20px rgba(0,0,0,.18);
-}
-
-/* états correct/faux plus jolis */
-#quiz .answer.correct{
-  background: linear-gradient(135deg, #2ecc71 0%, #1f9d57 100%);
-  color:#fff;
-}
-#quiz .answer.wrong{
-  background: linear-gradient(135deg, #ff4d6d 0%, #c9184a 100%);
-  color:#fff;
-}
-#quiz .answer.correct .badge,
-#quiz .answer.wrong .badge{
-  background: rgba(255,255,255,.22);
-  color:#fff;
-}
-
-/* Explications stylées */
-#quiz .explain{
-  background:
-    radial-gradient(300px 180px at 20% 0%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 70%),
-    #f7f6ff;
-  border:1px solid color-mix(in srgb, var(--accent) 22%, #e6e3ff 78%);
-  box-shadow: 0 12px 28px rgba(0,0,0,.10);
-}
-
-/* Bouton "Question suivante" reprend l'accent */
-#quiz .btn.primary{
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
-      color-mix(in srgb, var(--accent) 62%, #000000 38%) 100%);
-  box-shadow: 0 14px 30px rgba(0,0,0,.18);
-}
-/* =========================================
-   QUIZ SCREEN – COULEURS (utilise --accent)
-   ========================================= */
-:root{ --accent:#6C4BFF; }
-
-/* Fond coloré discret sur l'écran quiz */
-#quiz.card{
-  background:
-    radial-gradient(900px 380px at 10% 0%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 60%),
-    radial-gradient(700px 340px at 90% 0%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 62%),
-    var(--card);
-}
-
-/* Badge QUESTION 1/20 */
-#quiz .pill{
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
-    color-mix(in srgb, var(--accent) 60%, #000000 40%) 100%);
-  color:#fff;
-  box-shadow: 0 10px 22px rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.25);
-}
-
-/* Meta (Facile • Coran • Quiz #1) */
-#quiz .meta{
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  padding:8px 12px;
-  border-radius:999px;
-  display:inline-block;
-  border:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-/* Réponses colorées + relief */
-#quiz .answer{
-  border:1px solid rgba(255,255,255,.65);
-  background:
-    radial-gradient(140px 90px at 18% 35%, rgba(255,255,255,.70) 0%, rgba(255,255,255,0) 60%),
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--accent) 12%, #ffffff 88%) 0%,
-      #ffffff 70%);
-  box-shadow:
-    0 14px 30px rgba(0,0,0,.10),
-    inset 0 1px 0 rgba(255,255,255,.70);
-  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
-}
-#quiz .answer:hover{
-  transform: translateY(-3px);
-  box-shadow:
-    0 18px 40px rgba(0,0,0,.14),
-    inset 0 1px 0 rgba(255,255,255,.70);
-  filter: brightness(1.02);
-}
-
-/* Badges A/B/C/D */
-#quiz .badge{
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
-    color-mix(in srgb, var(--accent) 60%, #000000 40%) 100%);
-  color:#fff;
-  box-shadow:0 10px 20px rgba(0,0,0,.18);
-}
-
-/* Explications */
-#quiz .explain{
-  background:
-    radial-gradient(300px 180px at 20% 0%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 70%),
-    #f7f6ff;
-  border:1px solid color-mix(in srgb, var(--accent) 22%, #e6e3ff 78%);
-  box-shadow: 0 12px 28px rgba(0,0,0,.10);
-}
-
-/* Bouton suivant = accent */
-#quiz .btn.primary{
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--accent) 92%, #ffffff 8%) 0%,
-    color-mix(in srgb, var(--accent) 60%, #000000 40%) 100%);
-  box-shadow: 0 14px 30px rgba(0,0,0,.18);
-}
-/* ==========================
-   BANNIÈRE TOP
-   ========================== */
-.top-banner{
-  width:100%;
-  background: linear-gradient(180deg, #0f6f66, #0b5e57);
-  padding:14px 0 18px;
-  display:flex;
-  justify-content:center;
-}
-
-.top-banner img{
-  max-width:1200px;
-  width:92%;
-  border-radius:18px;
-  box-shadow:
-    0 18px 40px rgba(0,0,0,.25),
-    inset 0 1px 0 rgba(255,255,255,.25);
-}
-.card{
-  background: var(--bg-soft);
-  border-radius:20px;
-  box-shadow:
-    0 18px 40px rgba(0,0,0,.18),
-    inset 0 1px 0 rgba(255,255,255,.7);
+  color:rgba(255,255,255,.80);
+  padding:10px 0 20px;
 }
